@@ -1,0 +1,98 @@
+# ============================================================
+#  CAD 修改智能识别 —— 模型配置（默认）
+#  改这里即可改变引擎行为；命令行可用 -c 指定其它预设。
+# ============================================================
+
+# 1) 几何 / 位置容差（图纸单位，DWG 多为毫米）
+tolerances:
+  pos_tol: 20.0     # 空间候选匹配的最大中心距离（RTree 搜索半径）
+  pos_eps: 2.0      # 位移超过此值视为"移动"
+  geom_eps: 0.5     # 几何差异超过此值视为"修改"
+
+# 2) 配准：默认保留原始坐标，避免整体移动被配准消除
+#    method: none | translation | rigid
+#      none        -> 平移估计只辅助寻找对应实体，实体移动仍按原始坐标列出
+#      translation -> 用户明确选择时，按平移配准
+#      rigid       -> 用户明确选择时，按旋转和平移配准
+registration:
+  method: none
+  min_pairs: 8      # 估算变换所需的最少同源实体对
+
+# 3) 图层过滤：把 diff 限定在关注的图层
+#    mode: all | only | except
+#      all   -> 比所有图层
+#      only  -> 只比 focus 列表（支持 * 通配，如 "EQ-*"）
+#      except-> 排除 focus 列表
+layers:
+  mode: all
+  focus: []
+
+# 4) 块（INSERT）处理
+blocks:
+  expand: true      # true=递归展开块内实体参与 diff；false=只比对块引用(位置+块名)
+
+# 5) 实体类型开关（false 的类型直接跳过）
+entity_types:
+  LINE: true
+  CIRCLE: true
+  ARC: true
+  LWPOLYLINE: true
+  POLYLINE: true
+  TEXT: true
+  MTEXT: true
+  INSERT: true
+  DIMENSION: true
+  MULTILEADER: true
+  LEADER: true
+  HATCH: true        # 填充：纳入存在性/位置比对（关闭"填充删除漏检"）
+  SPLINE: false
+  SOLID: false
+  POINT: false
+  PROXY_ENTITY: false
+
+# 6) 配色：kind -> [DXF 颜色号, PNG 十六进制]
+colors:
+  ADDED:    [3, "green"]     # 新增 绿
+  DELETED:  [1, "red"]       # 删除 红
+  MODIFIED: [2, "orange"]    # 修改 橙
+  MOVED:    [6, "magenta"]   # 移动 品红
+
+# 7) 输出格式开关
+output:
+  dxf: true          # 标注版 DXF（CHANGES 图层）
+  png: true          # 整图对比 PNG
+  zoom: true         # 分簇聚焦放大 PNG
+  docx: true         # Word 报告（中文，闭环交付）
+  txt: true          # 文字说明
+  json: true         # 结构化清单
+  pdf: true          # PDF 报告（摘要+明细+图）
+  html: true         # HTML 报告（内嵌图，自包含）
+  zip: true          # 把上述所有产物聚合成一个 result.zip（便于交付/下载）
+  raster: false      # 栅格级像素 diff（见 raster.*；可用 --raster 开启）
+  dpi: 130
+  zoom_dpi: 150
+
+# 8) 栅格级兜底（矢量解析失败或作为补充视图时启用）
+raster:
+  enabled: false
+  min_area_ratio: 0.0008   # 差异连通域占图幅比例低于此值忽略（噪声过滤）
+  kernel: 3
+  dpi: 120
+
+# 9) LLM 语义摘要层（占 20% 的理解与表达）
+#    provider: rule | openai
+#      rule   -> 无依赖的规则式中文摘要（默认，离线可用）
+#      openai -> 调 OpenAI 兼容接口；缺 key 或失败自动回退 rule
+#    api_key 优先读环境变量 CAD_LLM_API_KEY
+llm:
+  provider: rule            # rule（离线默认） / openai（需填 api_key）
+  base_url: "https://api.openai.com/v1"
+  model: "gpt-4o-mini"
+  api_key: ""               # 留空则自动走规则摘要
+  temperature: 0.2
+  max_tokens: 1200
+  language: "zh"
+  # 清单瘦身与超时保护：防止大图纸把请求打爆，或让用户干等
+  timeout: 20               # 秒；超时自动回退规则摘要
+  max_items: 200            # 逐条送入模型的变更上限，超出部分只给统计概览
+  char_budget: 60000        # 清单字符数硬上限，超出即截断

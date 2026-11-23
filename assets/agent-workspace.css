@@ -1,0 +1,156 @@
+/* Shared Agent workspace: readable type, content-sized controls, compact spacing. */
+body { font-size:14px; }
+.topbar { height:62px; min-height:62px; padding:0 24px; }
+.topbar .mode-link,.topbar .agent-active-mode { font-size:14px; padding:7px 18px; }
+.wrap { margin-top:0; margin-bottom:0; padding-top:18px; padding-bottom:18px; gap:14px; }
+.card { padding:18px; border-radius:9px; box-shadow:none; }
+.card h2 { font-size:18px; line-height:1.5; }
+.agent-page-header { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:0 2px 2px; }
+.agent-page-header[hidden] { display:none; }
+.agent-page-header h1 { margin:0 0 3px; font-size:22px; line-height:1.5; color:#233e60; }
+.agent-page-header p { color:#8494a8; font-size:12px; line-height:1.6; }
+.agent-page-project { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.agent-page-project label { display:flex; flex-direction:row; align-items:center; gap:10px; font-size:13px; color:#657b93; white-space:nowrap; }
+.agent-page-project select { width:240px; min-height:34px; padding:6px 10px; font-size:13px; background:white; }
+.hint,.todo,.source-banner,.sop-detail { font-size:12px; line-height:1.7; }
+input,select,button,button.mini,.ver-btn { font-size:13px; line-height:1.5; }
+input,select { min-height:34px; padding:6px 10px; }
+button,button.mini,.ver-btn { width:auto; min-height:32px; padding:6px 12px; }
+table,table th,table td,.visa-detail td { font-size:13px; line-height:1.65; }
+table th { height:auto; padding:10px 12px; font-size:12px; white-space:nowrap; }
+table td { padding:12px; }
+table .hint,table input,table select,table button { font-size:12px; }
+.cols,.col-l,.col-r { min-width:0; }
+.cols { margin:0; }
+.tbl-scroll { max-height:none; border-radius:6px; }
+body:not([data-agent-view="overview"]) .tabs { display:none; }
+#tab-ledger > .tbl-scroll > table { min-width:1000px; }
+#tab-ledger > .row { gap:10px; margin:12px 0; }
+#fRisk { width:220px; }
+#fStatus { width:140px; }
+#tab-ledger .stat { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:12px; }
+#ledgerStats .stat-box { flex:0 1 155px; min-width:125px; padding:12px 16px; background:#f7faff; border:1px solid #e5edf7; border-radius:7px; text-align:left; }
+#ledgerStats .stat-box .n { font-size:24px; line-height:1.3; }
+#ledgerStats .stat-box .l { font-size:12px; margin-top:3px; }
+#ledgerStats > .visa-notice { flex:1 1 300px; padding:9px 12px; font-size:12px; }
+.visa-notice { max-width:330px; padding:7px 10px; font-size:12px; line-height:1.6; border-radius:5px; }
+.tag { font-size:12px; padding:3px 8px; }
+.visa-detail > td { padding:12px; background:#f8fafd; }
+.visa-detail table { background:#fff; min-width:1050px; }
+.visa-detail table td { padding:10px 12px; }
+.visa-detail table td:nth-child(2) { min-width:210px; }
+.visa-detail table td:nth-child(5) { min-width:245px; }
+.visa-detail table td:last-child { min-width:240px; }
+.thickness-editor { min-width:220px; max-width:275px; }
+.thickness-editor .hint,.thickness-editor output { font-size:12px; }
+.thickness-editor .thickness-line label,.thickness-editor button { font-size:13px; }
+td.visa-actions { width:135px; min-width:135px; }
+.visa-actions select { width:116px; min-height:32px; font-size:13px; }
+.visa-operation { min-width:106px; }
+.visa-action-links button { font-size:13px; }
+#versionsBox { display:grid; gap:14px; }
+#versionsBox > div { margin:0 !important; border:1px solid #e5edf6; border-radius:7px; overflow:hidden; }
+#versionsBox > div > b { display:block; padding:11px 14px; background:#f5f8fc; font-size:14px; font-weight:600; }
+.ver-chain { display:flex; flex-direction:column; align-items:stretch; margin:0; padding:0 14px; gap:0; }
+.version-row { display:flex; width:100%; flex-wrap:wrap; align-items:center; gap:8px; padding:12px 0; border-bottom:1px solid #edf2f8; }
+.version-row:last-child { border:0; }
+.version-row > .hint { flex:1 1 230px; font-size:12px; }
+.version-row > .ver { flex:0 0 44px; text-align:center; font-size:13px; padding:3px 7px; }
+.version-row .ver-arrow { display:none; }
+.version-row .ver-btn { min-height:30px; margin:0; padding:4px 10px; font-size:12px; }
+.cmp-head { padding:12px 16px; font-size:14px; }
+.cmp-body { padding:14px; max-height:65vh; }
+.cmp-tabs { padding:9px 14px; gap:8px; }
+.cmp-tabs button { min-height:30px; padding:4px 10px; font-size:12px; }
+#tab-archive > .tbl-scroll table { min-width:800px; }
+#tab-archive td { vertical-align:top; }
+#tab-archive td:first-child { min-width:150px; }
+.archive-files summary { color:#3678ba; cursor:pointer; font-size:13px; padding:1px 0; }
+.archive-files > div { display:grid; gap:4px; max-width:330px; padding-top:8px; overflow-wrap:anywhere; }
+.archive-files a { color:#3d6c9b !important; font-size:12px; line-height:1.65; }
+#tab-report > .row { margin-bottom:14px !important; }
+#reportSel { width:min(100%,600px); min-height:36px; font-size:13px; }
+pre.report { max-height:calc(100vh - 250px); min-height:180px; margin:0; padding:18px 20px; border:1px solid #e4ecf5; border-radius:7px; background:#f8fafd; color:#344f6d; font-family:"Microsoft YaHei","PingFang SC",sans-serif; font-size:14px; line-height:1.9; white-space:pre-wrap; overflow-wrap:anywhere; }
+#cmpReportBox { min-height:0; font-size:13px; }
+.report-document { max-height:calc(100vh - 250px); min-height:180px; overflow:auto; padding:18px 22px; border:1px solid #e4ecf5; border-radius:7px; background:#fff; color:#344f6d; font-size:14px; line-height:1.8; }
+.report-document h2 { font-size:20px; margin:0 0 16px; padding:0 0 12px; border-bottom:1px solid #e5edf7; }
+.report-document h3 { font-size:16px; margin:20px 0 10px; }
+.report-document p { margin:5px 0; overflow-wrap:anywhere; }
+.report-document .report-meta { color:#74869b; font-size:13px; }
+.report-document .report-table { overflow:auto; margin:12px 0; }
+.report-document table { width:100%; border-collapse:collapse; min-width:460px; }
+.report-document th,.report-document td { padding:9px 12px; border-bottom:1px solid #e8eef5; text-align:left; font-size:13px; vertical-align:top; }
+.report-document th { background:#f1f6fc; white-space:nowrap; }
+body[data-agent-view="workflow"] #workflowInputs { display:block; }
+body[data-agent-view="workflow"] .workflow-project { display:none !important; }
+body[data-agent-view="workflow"] #workflowInputs > .workflow-drawing { padding:16px 18px; }
+body[data-agent-view="workflow"] .workflow-drawing > h2 { margin-bottom:14px; padding-bottom:10px; font-size:17px; }
+body[data-agent-view="workflow"] .drawing-section { margin:0; }
+body[data-agent-view="workflow"] .drawing-grid { grid-template-columns:1fr 1fr 1.15fr; gap:14px; }
+body[data-agent-view="workflow"] .drawing-grid .task-field:last-child { grid-column:auto; }
+body[data-agent-view="workflow"] .task-field { font-size:13px; gap:6px; }
+body[data-agent-view="workflow"] input,body[data-agent-view="workflow"] select { min-height:36px; padding:7px 10px; font-size:13px; }
+body[data-agent-view="workflow"] .task-action { margin-top:15px; }
+body[data-agent-view="workflow"] #runBtn { min-height:36px; padding:7px 18px; font-size:13px; }
+body[data-agent-view="workflow"] #baselineHint { margin-top:12px !important; padding:8px 12px; font-size:12px; }
+body[data-agent-view="workflow"] #workflowExecution { padding:16px 18px; }
+body[data-agent-view="workflow"] #workflowExecution > h2 { font-size:17px; margin-bottom:12px; padding-bottom:10px; }
+#sopBox { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+#sopBox > .hint { grid-column:1/-1; padding:12px 0; }
+body[data-agent-view="workflow"] .sop-item { padding:12px; border:1px solid #e6edf6; border-radius:6px; gap:9px; background:#fbfdff; }
+body[data-agent-view="workflow"] .sop-item { transition:background-color .25s, border-color .25s, box-shadow .25s; }
+body[data-agent-view="workflow"] .sop-item:not(.done):not(.active):not(.failed) { background:#f5f7fa; border-color:#e2e8f0; }
+body[data-agent-view="workflow"] .sop-item.done { background:#e9f7ef; border-color:#81c9a3; }
+body[data-agent-view="workflow"] .sop-item.done :is(.sop-no,.sop-name,.sop-detail) { color:#17643e; }
+body[data-agent-view="workflow"] .sop-item.active { background:#e6f0ff; border-color:#2878e8; box-shadow:inset 4px 0 #2878e8,0 0 0 2px #2878e81a; }
+body[data-agent-view="workflow"] .sop-item.active :is(.sop-no,.sop-name,.sop-detail) { color:#1455ad; }
+body[data-agent-view="workflow"] .sop-item.active .sop-detail { font-weight:700; }
+body[data-agent-view="workflow"] .sop-item.failed { background:#fff0f0; border-color:#e99898; }
+body[data-agent-view="workflow"] .sop-item.failed :is(.sop-no,.sop-name,.sop-detail) { color:#ac2929; }
+@media(prefers-reduced-motion:reduce) { body[data-agent-view="workflow"] .sop-item { transition:none; } }
+
+.sop-no { font-size:12px; width:26px; height:26px; line-height:26px; flex-shrink:0; }
+.sop-name { font-size:13px; font-weight:600; line-height:1.6; }
+.sop-detail { font-size:12px; }
+body[data-agent-view="workflow"] #agentSummary { margin-top:14px !important; padding:12px 14px; }
+body[data-agent-view="workflow"] #agentSummary h2 { margin-bottom:8px; padding-bottom:8px; font-size:15px; }
+#summaryText { font-size:13px !important; line-height:1.8; }
+/* Keep the overview on one laptop screen without shrinking its text. */
+body[data-agent-view="overview"] .wrap { padding-top:12px; padding-bottom:12px; }
+.overview-top { margin-bottom:12px; gap:10px; }
+.overview-welcome { min-height:104px; padding:16px 20px; }
+.overview-buildings { height:104px; }
+#agentDashboard .overview-welcome h2 { font-size:20px; margin-bottom:5px; }
+.overview-welcome p { font-size:12px; line-height:1.6; }
+.overview-metric { padding:18px 12px; gap:9px; }
+.overview-metric strong { font-size:25px; }
+.overview-middle { gap:12px; }
+.overview-panel { padding:16px; }
+.overview-panel-head { margin-bottom:12px; }
+.overview-panel-head h3 { font-size:16px; }
+#agentDashboard .overview-projects th { padding:8px 9px; font-size:12px; }
+#agentDashboard .overview-projects td { padding:11px 9px; font-size:12px; }
+#agentDashboard .overview-project-name { font-size:13px; }
+.overview-stage { font-size:11px; }
+.overview-project-note { margin-top:9px; font-size:11px; }
+.overview-date { font-size:11px; }
+.overview-flow { padding:14px 0 12px; }
+.overview-flow-step { gap:7px; }
+.overview-flow-step strong { font-size:13px; }
+.overview-flow-step > span:last-child { font-size:11px; }
+.overview-context { font-size:12px; }
+.overview-section-label { margin:12px 0 8px; font-size:13px; }
+.overview-bottom { gap:12px; }
+.overview-bottom .overview-panel { min-height:164px; padding:14px 16px; }
+.overview-ledger-stat .overview-icon { display:none; }
+#agentDashboard .overview-ledger-stat { padding:12px 4px; gap:9px; }
+.overview-ledger-stat > span:last-child { font-size:12px; }
+.overview-facts { gap:9px; margin:1px 0 8px; }
+.overview-facts dt { font-size:12px; }
+.overview-facts dd { font-size:14px; }
+.overview-facts dd.overview-date { font-size:11px; }
+#agentDashboard .overview-outline-button { font-size:12px; min-height:28px; padding:4px 10px; }
+@media(min-width:1100px) { .overview-top { grid-template-columns:2.6fr repeat(4,1fr); } .overview-welcome { grid-column:auto; } .overview-middle { grid-template-columns:minmax(0,1.65fr) minmax(0,1fr); } .overview-bottom { grid-template-columns:1.35fr 1fr 1fr 1fr; } .overview-projects .overview-table-scroll { max-height:184px; } }
+@media(min-width:1100px) and (max-height:780px) { .overview-top { margin-bottom:10px; } .overview-welcome { min-height:98px; } .overview-bottom .overview-panel { min-height:154px; } .overview-flow { padding:10px 0; } .overview-projects .overview-table-scroll { max-height:150px; } }
+@media(max-width:1100px) { #sopBox { grid-template-columns:repeat(2,minmax(0,1fr)); } .agent-page-project select { width:200px; } }
+@media(max-width:740px) { .agent-page-header { align-items:flex-start; flex-direction:column; gap:12px; } .agent-page-project,.agent-page-project label,.agent-page-project select { width:100%; } .agent-page-header h1 { font-size:20px; } body[data-agent-view="workflow"] .drawing-grid { grid-template-columns:1fr; } #sopBox { grid-template-columns:1fr; } .overview-welcome { min-height:104px; } .overview-bottom .overview-panel { min-height:145px; } }

@@ -1,0 +1,75 @@
+# ============================================================
+#  天正 / 暖通 / 给排水 / 电气 图纸预设
+#  适用：已展开为标准图元(_t5 等)的天正图；侧重专业图层、大图性能。
+# ============================================================
+tolerances:
+  pos_tol: 30.0     # 天正图标注/引线多，放宽候选半径
+  pos_eps: 2.0
+  geom_eps: 0.5
+
+registration:
+  method: none          # 默认保留原始坐标，整体平移也作为移动变更标注
+  min_pairs: 8
+
+layers:
+  mode: all
+  focus: []             # 如需只看专业图层可改 only: ["EQ-*", "W-*"]
+
+blocks:
+  expand: true          # 暖通设备常成块，展开以捕获块内修改
+
+entity_types:
+  LINE: true
+  CIRCLE: true
+  ARC: true
+  LWPOLYLINE: true
+  POLYLINE: true
+  TEXT: true
+  MTEXT: true
+  INSERT: true
+  DIMENSION: true
+  MULTILEADER: true
+  LEADER: true
+  HATCH: true
+  SPLINE: false
+  SOLID: false
+  POINT: false
+  PROXY_ENTITY: false
+
+colors:
+  ADDED:    [3, "green"]
+  DELETED:  [1, "red"]
+  MODIFIED: [2, "orange"]
+  MOVED:    [6, "magenta"]
+
+output:
+  dxf: true
+  png: true
+  zoom: true
+  docx: true
+  txt: true
+  json: true
+  pdf: true
+  html: true
+  zip: true
+  raster: false
+  dpi: 130
+  zoom_dpi: 150
+
+raster:
+  enabled: false
+  min_area_ratio: 0.0008
+  kernel: 3
+  dpi: 120
+
+llm:
+  provider: rule
+  base_url: "https://api.openai.com/v1"
+  model: "gpt-4o-mini"
+  api_key: ""
+  temperature: 0.2
+  max_tokens: 1200
+  language: "zh"
+  timeout: 20
+  max_items: 200
+  char_budget: 60000

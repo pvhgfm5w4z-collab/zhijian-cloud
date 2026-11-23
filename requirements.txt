@@ -1,0 +1,2 @@
+# Demo web app and CAD diff engine dependencies
+-r core_src/CAD修改智能识别agent/requirements.txt

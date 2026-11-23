@@ -1,0 +1,98 @@
+/* Project overview: pale blueprint palette, compact operational hierarchy. */
+body[data-agent-view="overview"] .wrap { padding-top:20px; }
+#agentOverview { border:0; padding:0; background:transparent; box-shadow:none; }
+#agentOverview > h2 { display:none; }
+#agentDashboard { --ov-ink:#223f60; --ov-muted:#71849b; --ov-blue:#2681ed; --ov-line:#e4edf7; font-size:13px; color:var(--ov-ink); }
+#agentDashboard button { font-family:inherit; cursor:pointer; }
+#agentDashboard button:disabled { cursor:default; opacity:.45; }
+#agentDashboard button:focus-visible { outline:2px solid #2681ed; outline-offset:3px; }
+.overview-top { display:grid; grid-template-columns:2.8fr repeat(4,1fr); gap:12px; margin-bottom:16px; }
+.overview-welcome { position:relative; display:flex; align-items:center; overflow:hidden; min-height:134px; padding:22px 26px; border:1px solid #dae9fc; border-radius:10px; background:linear-gradient(105deg,#d9e9ff,#edf5ff); }
+.overview-welcome > div { position:relative; z-index:1; }
+#agentDashboard .overview-welcome h2 { display:block; font-size:21px; line-height:1.4; margin:0 0 10px; border:0; padding:0; color:#203d61; }
+.overview-welcome p { color:#5c7b9f; font-size:12px; line-height:1.9; }
+.overview-buildings { position:absolute; right:-8px; bottom:0; width:48%; height:130px; opacity:.85; }
+.overview-metric { display:flex; align-items:flex-start; gap:11px; padding:23px 16px; background:#fff; border:1px solid var(--ov-line); border-radius:10px; }
+.overview-metric > div { display:grid; gap:10px; }
+.overview-metric > div > span { color:var(--ov-muted); font-size:12px; white-space:nowrap; }
+.overview-metric strong { color:#243f62; font-size:27px; line-height:1; font-weight:650; font-variant-numeric:tabular-nums; }
+.overview-icon { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; width:38px; height:38px; border-radius:50%; }
+.overview-icon svg { width:20px; height:20px; }
+.overview-icon.blue { color:#2984ef; background:#eaf3ff; }
+.overview-icon.coral { color:#ed7181; background:#fff0f2; }
+.overview-icon.green { color:#21b482; background:#e9f8f1; }
+.overview-icon.amber { color:#e4a044; background:#fff5e7; }
+.overview-middle { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(0,1fr); gap:16px; }
+.overview-panel { min-width:0; padding:20px; border:1px solid var(--ov-line); border-radius:10px; background:#fff; box-shadow:0 1px 3px #24456704; }
+.overview-panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; }
+.overview-panel-head h3 { margin:0; font-size:15px; font-weight:700; line-height:1.4; }
+.overview-heading { display:flex; align-items:center; gap:14px; }
+#agentDashboard .overview-outline-button { width:auto; min-height:30px; padding:4px 12px; border:1px solid #d4e5fa; border-radius:5px; background:#f8fbff; color:#3382d7; font-size:12px; font-weight:600; white-space:nowrap; }
+#agentDashboard .overview-outline-button:hover { border-color:#74b0f4; background:#eff6ff; }
+#agentDashboard .overview-text-button { min-height:24px; padding:0; border:0; background:transparent; color:#8299b4; font-size:11px; white-space:nowrap; }
+.overview-text-button span { margin-left:3px; font-size:16px; }
+.overview-meta { color:#8b9db2; font-size:11px; }
+.overview-table-scroll { overflow:auto; }
+.overview-projects table { width:100%; border-collapse:collapse; white-space:nowrap; }
+#agentDashboard .overview-projects th { padding:10px 11px; height:auto; border:0; background:#f1f6fc; color:#63809f; font-size:11px; font-weight:600; }
+.overview-projects th:first-child { border-radius:5px 0 0 5px; }
+.overview-projects th:last-child { border-radius:0 5px 5px 0; }
+#agentDashboard .overview-projects td { padding:15px 11px; border-bottom:1px solid #eff3f8; font-size:11px; color:#4e6885; }
+.overview-projects tr.is-current td { background:#fbfdff; }
+#agentDashboard .overview-project-name { display:inline; padding:0; background:transparent; border:0; color:#365d87; font-size:12px; font-weight:600; }
+.overview-current { margin-left:7px; font-size:9px; color:#6c91ba; }
+.overview-stage { display:inline-block; padding:3px 6px; border-radius:4px; background:#edf2f7; color:#6d83a0; font-size:10px; }
+.overview-stage.construction { background:#e5f0ff; color:#508cdd; }
+.overview-progress { display:flex; align-items:center; gap:8px; font-size:10px; font-variant-numeric:tabular-nums; }
+.overview-progress progress { appearance:none; width:72px; height:6px; border:0; border-radius:8px; overflow:hidden; background:#edf3fa; }
+.overview-progress progress::-webkit-progress-bar { background:#edf3fa; }
+.overview-progress progress::-webkit-progress-value { background:#20acd0; border-radius:8px; }
+.overview-progress progress::-moz-progress-bar { background:#20acd0; }
+.overview-date { color:#8193a9; font-size:10px; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.overview-project-actions { display:flex; gap:12px; }
+#agentDashboard .overview-project-actions button { min-height:24px; padding:0; border:0; background:transparent; font-size:11px; color:#3382d7; white-space:nowrap; }
+.overview-project-note { margin-top:12px; color:#97a6b8; font-size:10px; }
+.overview-context { margin-top:-5px; color:#8b9db2; font-size:11px; }
+.overview-flow { display:flex; align-items:flex-start; padding:24px 0 18px; }
+.overview-flow-step { position:relative; flex:1; display:flex; flex-direction:column; align-items:center; gap:9px; text-align:center; color:#9caec3; }
+.overview-flow-step:not(:last-child)::after { content:''; position:absolute; left:calc(50% + 23px); top:18px; width:calc(100% - 46px); height:2px; background:#e4edf8; }
+.overview-flow-step.done:not(:last-child)::after { background:#a8d2ff; }
+.overview-flow-icon { display:grid; place-items:center; width:38px; height:38px; border:2px solid #e9f0f8; border-radius:50%; color:#9bafc7; background:#f7fafd; }
+.overview-flow-icon svg { width:18px; height:18px; }
+.overview-flow-step.done .overview-flow-icon { border-color:#c0ddff; color:#2681ed; background:#edf6ff; }
+.overview-flow-step.done:first-child .overview-flow-icon { background:#1599df; border-color:#1599df; color:#fff; }
+.overview-flow-step strong { font-size:12px; font-weight:600; color:#5b7798; }
+.overview-flow-step > span:last-child { font-size:10px; }
+.overview-flow-step.done > span:last-child { color:#368bec; }
+.overview-flow-footer { display:flex; align-items:center; justify-content:space-between; margin-top:5px; }
+.overview-flow-hint { font-size:10px; color:#a4b5c9; }
+.overview-section-label { margin:20px 0 11px; color:#476584; font-size:12px; font-weight:600; }
+.overview-section-label span { margin-left:10px; font-size:11px; font-weight:400; color:#8da0b6; }
+.overview-bottom { display:grid; grid-template-columns:1.35fr 1fr 1fr 1fr; gap:14px; }
+.overview-bottom .overview-panel { display:flex; flex-direction:column; min-height:190px; padding:18px; }
+.overview-ledger-metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; flex:1; }
+#agentDashboard .overview-ledger-stat { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:7px; min-width:0; padding:10px 4px; border:1px solid #eef3fa; border-radius:7px; background:#fcfdff; color:#778ca5; }
+.overview-ledger-stat .overview-icon { width:30px; height:30px; }
+.overview-ledger-stat .overview-icon svg { width:16px; height:16px; }
+.overview-ledger-stat strong { font-size:20px; color:#2b7cdb; line-height:1; font-variant-numeric:tabular-nums; }
+.overview-ledger-stat > span:last-child { font-size:10px; white-space:nowrap; }
+.overview-facts { display:grid; gap:13px; margin:3px 0 12px; }
+.overview-facts > div { display:flex; align-items:center; gap:16px; }
+.overview-facts dt { min-width:67px; color:#91a2b8; font-size:11px; }
+.overview-facts dd { margin:0; color:#3d5e83; font-weight:600; font-size:13px; }
+.overview-facts dd.overview-date { font-size:10px; font-weight:400; }
+.overview-card-footer { margin-top:auto; display:flex; justify-content:flex-end; }
+.overview-empty { padding:35px 15px !important; text-align:center; color:#8b9cb1; }
+#newProjectDialog { width:560px; max-width:calc(100vw - 32px); margin:auto; padding:24px; border:1px solid #dce7f5; border-radius:12px; color:#223f60; }
+#newProjectDialog::backdrop { background:#17334e55; }
+#newProjectDialog > header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+#newProjectDialog h2 { font-size:19px; margin:0; }
+#newProjectDialog .dialog-close { border:0; background:transparent; color:#8299b4; font-size:23px; padding:0 6px; }
+#newProjectDialog .agent-project-details { background:transparent; border:0; margin:0; padding:0; }
+#newProjectDialog .agent-project-details h3 { display:none; }
+#newProjectDialog .project-grid { grid-template-columns:1fr 1fr; }
+#newProjectDialog .project-grid label:first-child { grid-column:1/-1; }
+#newProjectDialog .project-action { margin-top:22px; }
+@media(min-width:1700px) { .overview-welcome { min-height:150px; } .overview-panel { padding:24px; } .overview-projects td { height:60px; } }
+@media(max-width:1280px) { .overview-top { grid-template-columns:repeat(4,1fr); } .overview-welcome { grid-column:1/-1; min-height:115px; } .overview-welcome p br { display:none; } .overview-buildings { width:240px; } .overview-middle { grid-template-columns:1fr; } .overview-bottom { grid-template-columns:repeat(2,minmax(0,1fr)); } .overview-metric { padding:16px; } }
+@media(max-width:740px) { body[data-agent-view="overview"] .agent-sidebar { width:64px; padding:18px 7px; } body[data-agent-view="overview"] .agent-sidebar .agent-brand { padding:0; font-size:0; background-position:center; background-size:36px; } body[data-agent-view="overview"] .agent-sidebar button { width:50px; padding:13px; font-size:0; gap:0; } body[data-agent-view="overview"] .agent-sidebar button svg { width:23px; height:23px; } body[data-agent-view="overview"] .topbar { margin-left:64px; padding:0 14px; } body[data-agent-view="overview"] .wrap { margin-left:64px; width:calc(100% - 64px); padding:14px 12px; } .overview-top { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; } .overview-metric { gap:8px; padding:15px 10px; } .overview-metric .overview-icon { width:30px; height:30px; } .overview-metric strong { font-size:23px; } .overview-metric > div > span { font-size:10px; } .overview-welcome { padding:20px 16px; } #agentDashboard .overview-welcome h2 { font-size:18px; } .overview-welcome p { max-width:200px; font-size:11px; } .overview-buildings { width:150px; right:-20px; opacity:.45; } .overview-panel { padding:15px; } .overview-bottom { grid-template-columns:1fr; gap:12px; } .overview-flow-hint { display:none; } .overview-meta { display:none; } .overview-flow-step strong { font-size:10px; } .overview-project-note { font-size:9px; } }

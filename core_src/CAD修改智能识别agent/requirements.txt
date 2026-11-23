@@ -1,0 +1,24 @@
+# CAD diff tool Python dependencies
+# Install with: python -m pip install -r requirements.txt
+# Core parsing/diff/report dependencies are listed first; web dependencies follow.
+
+# Core: drawing parsing, geometry diff, rendering, and reports
+ezdxf>=1.1
+shapely>=2.0
+rtree>=1.0
+matplotlib>=3.7
+numpy>=1.24
+Pillow>=9.0
+PyYAML>=6.0
+opencv-python>=4.7
+scikit-image>=0.19
+reportlab>=4.0
+
+# Word reports
+python-docx>=1.0
+
+# Web UI
+fastapi>=0.100
+uvicorn>=0.20
+python-multipart>=0.0.6   # FastAPI multipart uploads
+aiofiles>=23.0            # Optional async file IO helper

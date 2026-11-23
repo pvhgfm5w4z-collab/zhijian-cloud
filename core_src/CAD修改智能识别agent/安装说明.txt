@@ -1,0 +1,273 @@
+================================================================
+CAD 修改智能识别 Agent —— 安装与运行说明
+================================================================
+
+本工具用于对比同一张 CAD 图纸的「旧版 / 新版」（DWG / DXF），
+自动找出修改部位、在图上圈注高亮，并产出结构化清单 + 中文摘要
++ 多格式报告（DXF / PNG / DOCX / PDF / HTML / JSON / TXT）。
+
+环境要求
+----------------------------------------------------------------
+- Python    : 3.11（推荐，已在 3.11 验证）
+- 操作系统  : Linux / macOS / Windows（WSL 亦可）
+- 约 1~2 GB 磁盘（含依赖与图样缓存）
+
+----------------------------------------------------------------
+一、安装 Python 依赖
+----------------------------------------------------------------
+在项目根目录执行：
+
+    pip3 install -r requirements.txt
+
+依赖清单（详见 requirements.txt）：
+  [核心]
+    ezdxf           解析 DXF / 读写圈注
+    shapely         几何运算
+    rtree           空间索引（候选匹配加速）
+    matplotlib      对比图 / 聚焦图绘制
+    numpy           数值计算
+    Pillow          图片处理
+    PyYAML          读取配置
+    opencv-python   栅格级像素 diff 兜底
+    scikit-image    图像处理辅助
+    reportlab       PDF 报告（中文用内置 STSong-Light 字体，无需额外字体）
+  [Word 报告]
+    python-docx     生成 .docx 报告
+  [Web 界面]
+    fastapi         Web 后端
+    uvicorn         Web 服务器（启动用）
+    python-multipart 接收上传文件
+    aiofiles        文件 IO 增强（可选）
+
+提示：
+  - 若用 conda，可先建环境再 pip 安装；rtree 在部分系统需系统库
+    libspatialindex（Linux: apt install libspatialindex-dev）。
+  - 若 pip 安装 opencv-python 较慢，可用 opencv-python-headless。
+
+----------------------------------------------------------------
+二、安装外部解析软件：DWG → DXF 转换器（二选一，建议都装）
+----------------------------------------------------------------
+本工具的矢量解析基于 DXF（ezdxf）。若你的图纸是 .dwg 二进制格式，
+服务端会自动调用转换器先转 DXF。支持两种转换器，均非 pip 包：
+
+  ┌──────────────────┬──────────────────────┬──────────────────────┐
+  │                  │ LibreDWG (dwg2dxf)   │ ODA File Converter   │
+  ├──────────────────┼──────────────────────┼──────────────────────┤
+  │ 获取方式         │ conda / apt / 源码   │ 官网注册后下载       │
+  │ 授权             │ 开源免费             │ 免费但不开源         │
+  │ 兼容性           │ 普通 DWG 够用；高    │ 最好：官方 ODA 平台，│
+  │                  │ 版本 / 天正图纸可能  │ 高版本 DWG、天正、   │
+  │                  │ 报错（本工具已容错） │ 代理实体兼容性更强   │
+  │ 速度             │ 快                   │ 中等（Qt 程序，需    │
+  │                  │                      │ X 环境 / xvfb，见下）│
+  └──────────────────┴──────────────────────┴──────────────────────┘
+
+  ⚠ 关于「标注测量值」——这是最常见误解，实测结论如下：
+
+  换 ODA **并不能**让标注测量值"出现"。原因是：DXF 里标注文字通常写成
+  `%%C<>`，`<>` 是 AutoCAD 的"运行时测量"占位符，真实数值根本不落盘，
+  ODA 和 libredwg 写出的内容一模一样。
+
+    实测（同一张含 26 条 DIMENSION 的轴类图）：
+      转换器        实体总数  LINE/MTEXT/DIMENSION/MULTILEADER
+      libredwg      278      178 / 37 / 26 / 18
+      ODA 27.1      278      178 / 37 / 26 / 18
+      → 实体构成完全一致，差异为 0。
+
+    再比"标注文字字段"：26 条里只有 9 条的 text 字段有内容，且都是
+    `%%C<>` 这种占位符；另 17 条 text 干脆是空字符串。两种转换器同样一致。
+    用 ezdxf 重算后，26 条标注**全部**得到精确测量值。
+
+  所以本工具的做法是：**不依赖转换器**，改用 ezdxf 的 `get_measurement()`
+  自行重算真实测量值（结果标记为 测量值=189.0 这类），两种转换器下都一致。
+
+  同理，**多重引线（MULTILEADER）的文字存在二进制 context data 里**，
+  两种转换器都无法解出。遇到时报告会如实写
+  「多重引线 (文字存于二进制context, 不可读)」，而不是瞎猜一个值。
+
+【2.1】LibreDWG / dwg2dxf（默认，建议先装）
+
+  方式 A（推荐，conda）：
+      conda create -n dwgconv -c conda-forge libredwg
+      # 转换命令即 dwg2dxf；确保它在 PATH 中
+      # 本机示例路径：/root/miniconda/envs/dwgconv/bin/dwg2dxf
+
+  方式 B（系统包管理器）：
+      # Debian/Ubuntu
+      apt-get install libredwg-tools        # 提供 dwg2dxf
+      # macOS (Homebrew)
+      brew install libredwg
+
+  方式 C（编译源码）：见 https://www.gnu.org/software/libredwg/
+
+  验证：dwg2dxf --version   （能输出版本号即成功）
+
+  注意：libredwg 对高版本 / 天正 DWG 常在 stderr 输出 ERROR 并以非零码
+  退出，但仍会写出可用的 DXF。本工具已做容错处理——只要产物非空即视为
+  转换成功，不会被它的退出码误导。
+
+【2.2】ODA File Converter（可选，兼容性最好）
+
+  这是 Open Design Alliance 官方转换器，对高版本 DWG、天正图纸、代理实体
+  的兼容性强于 libredwg。若你的图用 dwg2dxf 转出来实体缺失/报错，装它。
+  （注意：它不能解决"标注测量值为空"的问题，原因见上表 ⚠。）
+
+  获取步骤（apt / pip / conda 均无法安装，必须官网注册）：
+    1) 打开 https://www.opendesign.com/guestfiles/oda_file_Converter
+    2) 注册 / 登录 ODA 账号（免费），进入下载页
+    3) Linux 选 DEB 包，文件名形如
+           ODAFileConverter_QT6_lnxX64_8.3dll_27.1.deb
+       （不想装的可选 AppImage 版，需先 apt install fuse）
+       Windows / macOS 选对应 exe / dmg。
+
+  安装（Ubuntu 22.04 实测步骤，全部命令可直接复制）：
+      # 1) 安装（用 gdebi 可自动补依赖；或 apt install ./xxx.deb）
+      sudo apt install ./ODAFileConverter_QT6_lnxX64_8.3dll_27.1.deb
+
+      # 2) 补 Qt6/xcb 运行库（不装会以退出码 134 崩溃：
+      #    "Could not load the Qt platform plugin xcb"）
+      sudo apt-get install -y \
+        libxkbcommon-x11-0 libxkbcommon0 libxcb-cursor0 libxcb-icccm4 \
+        libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 \
+        libxcb-shape0 libxcb-xinerama0 libxcb-xkb1 libxcb-sync1 \
+        libxcb-xfixes0 libxcb-render0 libxcb-glx0 libxcb-shm0
+
+      # 3) 新版 Linux 常有 libxcb-util.so.0 缺失（系统只有 .so.1），需软链
+      #    （注意：包名 libxcb-util0 已不存在，请装 libxcb-util1 再软链）
+      sudo apt-get install -y libxcb-util1
+      cd /usr/lib/x86_64-linux-gnu
+      sudo ln -s libxcb-util.so.1 libxcb-util.so.0
+
+      # 4) 无头服务器必装 Xvfb（详见下方"无头运行"）
+      sudo apt-get install -y xvfb
+
+      # 5) 确认命令可用
+      which ODAFileConverter        # 正常输出 /usr/bin/ODAFileConverter
+
+  命令行用法（本工具已按此封装，无需手动执行）：
+      ODAFileConverter <输入目录> <输出目录> <版本> <类型> <递归> <审计> [过滤文件名]
+      例：ODAFileConverter ./in ./out ACAD2018 DXF 0 1 xxx.dwg
+
+  ── 无头运行（服务器 / Docker / CI）——这是最容易踩的坑 ──────────────
+  ODAFileConverter 是 Qt6 图形程序，即使纯命令行调用也需要 X 环境。
+  没有 X 服务时它会以退出码 134 崩溃，报
+      qt.qpa.xcb: could not connect to display
+      Could not load the Qt platform plugin "xcb"
+
+  解法是套一层 Xvfb 虚拟显示：
+      xvfb-run -a --server-args="-screen 0 1024x768x24" \
+               ODAFileConverter ./in ./out ACAD2018 DXF 0 1 xxx.dwg
+
+  本工具已内置自动兜底，你无需手动处理：
+    - 不只看 DISPLAY 环境变量（服务器里它常残留成 ":0" 但其实没有 X 服务），
+      而是检查 /tmp/.X11-unix 下有没有 socket；
+    - 判定无 X 服务时，自动用 xvfb-run 包裹执行；
+    - 若有 X 服务但直连仍失败，会再补一次 xvfb 重试。
+  唯一前提：系统里装了 xvfb（见上面第 4 步）。没装的话 ODA 路径会失败，
+  工具自动回退到 dwg2dxf，不会中断流程。
+
+【2.3】选择用哪个转换器
+
+  通过环境变量 CAD_DIFF_CONVERTER 控制，三档：
+
+      CAD_DIFF_CONVERTER=oda      优先 ODA，ODA 不可用再回退 dwg2dxf
+      CAD_DIFF_CONVERTER=dwg2dxf  只用 LibreDWG
+      CAD_DIFF_CONVERTER=auto     默认：先 dwg2dxf，失败再回退 ODA
+
+  设置方式：
+      # Linux/macOS
+      export CAD_DIFF_CONVERTER=oda
+      # Windows PowerShell
+      $env:CAD_DIFF_CONVERTER="oda"
+
+  缓存规则：两种转换器的结果分别缓存，互不覆盖——
+      old.dwg → old_converted.dxf   （dwg2dxf 产物）
+      old.dwg → old_oda.dxf         （ODA 产物）
+  同名已存在且非空时直接复用，不会重复转换（对大图提速明显）。
+  因此切换转换器后，若想强制重转，删掉对应 *_oda.dxf / *_converted.dxf。
+
+  使用入口：
+    - CLI：把转换器目录加入 PATH 即可直接传 .dwg
+          export PATH=/root/miniconda/envs/dwgconv/bin:$PATH
+          python3.11 cad_diff_cli.py old.dwg new.dwg -o result
+    - Web（bash web.sh）：启动脚本已自动把 dwg2dxf 加入 PATH，
+          上传 .dwg 会被自动转换；两个转换器都没装时仅支持 .dxf / .zip。
+          想优先走 ODA：CAD_DIFF_CONVERTER=oda bash web.sh
+
+  实测状态：开发环境（Ubuntu 24.04）已完整安装 ODA File Converter 27.1
+  并跑通（DEB 安装 + Qt6/xcb 依赖 + libxcb-util 软链 + xvfb），
+  与 dwg2dxf 双路径对比验证过：同一张图纸两条链路结果完全一致
+  （均为删除 10 处，明细逐行 diff 无差异），耗时 ODA 3.3s vs dwg2dxf 2.3s。
+  你拿到的这份程序里 ODA 支持是现成的——装好 ODA 后设
+  CAD_DIFF_CONVERTER=oda 即可启用，代码无需任何改动。
+
+  建议：日常用默认的 auto（先 dwg2dxf，快）；遇到高版本/天正图纸转换异常
+  时再切 oda，比对两次结果。
+
+----------------------------------------------------------------
+三、字体（中文报告）
+----------------------------------------------------------------
+- PDF 报告使用 reportlab 内置 CID 中文字体（STSong-Light），
+  **无需安装任何中文字体文件**，中文不会变成黑块。
+- Word 报告（.docx）内中文显式指定东亚字体（微软雅黑），
+  在 Office / WPS 中打开正常，缺字体会自动回退到系统默认中文字体。
+- 若系统完全没有中文字体且需渲染 PNG 对比图上的中文标注，
+  建议安装：apt-get install fonts-noto-cjk（可选，仅影响图面中文）。
+
+----------------------------------------------------------------
+四、快速运行
+----------------------------------------------------------------
+1) 命令行（单文件对比）：
+   export PATH=/root/miniconda/envs/dwgconv/bin:$PATH
+   python3.11 cad_diff_cli.py old.dxf new.dxf -o outputs/run/result
+   # 或指定配置
+   PYTHONPATH=src python3.11 -m cad_diff.cli old.dxf new.dxf -o result -c configs/default.yaml
+
+2) Web 交互界面：
+   bash web.sh 8000
+   # 浏览器打开 http://localhost:8000
+   # 支持拖拽上传 .dxf/.dwg/.zip，选预设，在线预览+下载
+
+3) 输出产物（以 result 为前缀）：
+   result.dxf 圈注版DXF | result.png 对比图 | result_zoom*.png 聚焦图
+   result.docx Word报告 | result.pdf PDF报告 | result.html 网页报告
+   result.json 结构化清单 | result.txt 文字说明 | result.zip 全部打包
+
+4) 回归测试（改动引擎后必跑，验证没破坏原有判定）：
+   export PATH=/root/miniconda/envs/dwgconv/bin:$PATH
+   python3.11 run_regression.py
+   # 9 个用例：6 个真实图纸 + 3 个判定规则专项用例
+   # 全部通过会打印「通过 9 | 不符 0 | 跳过 0」，退出码 0
+
+----------------------------------------------------------------
+五、常见问题
+----------------------------------------------------------------
+Q: 上传 .dwg 报错“找不到 dwg2dxf”？
+A: 见第二节安装 dwg2dxf 并加入 PATH；或先把 .dwg 手动转成 .dxf 再上传。
+
+Q: PDF 中文显示黑块/方块？
+A: 旧版用西文字体所致；当前版本已改用 STSong-Light CID 字体修复，
+   升级到本版即可。
+
+Q: 尺寸标注只显示成「φ<>」，拿不到实际数值？
+A: 不是转换的锅。`<>` 是 AutoCAD 的运行时测量占位符，真实数值本来就不
+   写进 DXF，换任何转换器都一样。本工具已用 ezdxf 依定义点重算出真实值，
+   报告里显示为「测量值=189.0」这种形式。
+
+Q: 我就改了一个字，为什么报成「删除一处 + 新增一处」？
+A: 说明新旧两版的中心距超出了配对容差（pos_tol，默认 20）。常见原因是
+   改文字时插入点被连带挪动，或改的是块内实体。想放宽就调大
+   configs/*.yaml 里 tolerances.pos_tol；原位改字正常会判为 MODIFIED。
+
+Q: 反过来，「这里删一段、别处加一段」被误报成「修改」怎么办？
+A: 说明两处中心距小于 pos_tol，被当成同一处改动了。调小 tolerances.pos_tol
+   即可。这两个问题方向相反，没有万能值——默认 20 是按常见图纸比例取的，
+   图纸特别大或特别小时按需微调。
+
+Q: rtree 安装失败？
+A: 需系统库 libspatialindex：apt-get install libspatialindex-dev 后重装。
+
+Q: Web 启动后无法访问？
+A: 确认端口未被占用；若部署在远程，将 web.sh 中 --host 改为 0.0.0.0
+   （当前已默认 0.0.0.0）。
+================================================================

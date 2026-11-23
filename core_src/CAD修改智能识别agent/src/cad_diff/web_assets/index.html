@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CAD 修改智能识别 · Web</title>
+<style>
+  :root{--bg:#0f1419;--card:#1b2330;--line:#2a3545;--fg:#e6edf3;--mut:#8b98a8;
+        --green:#3fb950;--red:#f85149;--orange:#f0883e;--magenta:#d2a8ff;--acc:#2f81f7;}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg);color:var(--fg);line-height:1.5}
+  header{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}
+  header h1{font-size:18px;margin:0}
+  header .badge{font-size:12px;color:var(--mut);border:1px solid var(--line);padding:2px 8px;border-radius:999px}
+  main{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:18px}
+  .row{display:flex;gap:14px;flex-wrap:wrap}
+  .field{flex:1;min-width:220px}
+  label{display:block;font-size:13px;color:var(--mut);margin-bottom:6px}
+  .drop{border:1.5px dashed var(--line);border-radius:10px;padding:16px;text-align:center;cursor:pointer;
+        transition:.15s;background:#141b26}
+  .drop:hover{border-color:var(--acc)}
+  .drop.hot{border-color:var(--acc);background:#16243a}
+  .drop small{color:var(--mut)}
+  select,button{font:inherit}
+  select{width:100%;padding:9px 10px;background:#0f1620;color:var(--fg);border:1px solid var(--line);border-radius:8px}
+  .opts{display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;font-size:13px;color:var(--mut)}
+  .opts label{display:inline-flex;gap:6px;align-items:center;color:var(--fg);cursor:pointer}
+  button.go{margin-top:16px;background:var(--acc);color:#fff;border:0;padding:11px 22px;border-radius:9px;
+            font-weight:600;cursor:pointer;font-size:15px}
+  button.go:disabled{opacity:.5;cursor:wait}
+  .stats{display:flex;gap:12px;flex-wrap:wrap}
+  .stat{flex:1;min-width:120px;text-align:center;padding:14px;border-radius:10px;background:#141b26;border:1px solid var(--line)}
+  .stat .n{font-size:28px;font-weight:700}
+  .stat .k{font-size:12px;color:var(--mut)}
+  .n.added{color:var(--green)} .n.deleted{color:var(--red)}
+  .n.modified{color:var(--orange)} .n.moved{color:var(--magenta)}
+  .summary{white-space:pre-wrap;font-size:14px;background:#141b26;border:1px solid var(--line);border-radius:8px;padding:12px}
+  .carousel{position:relative}
+  .carousel img{width:100%;border:1px solid var(--line);border-radius:8px;background:#fff}
+  .cnav{position:absolute;top:8px;right:8px;display:flex;gap:6px}
+  .cnav button{background:rgba(0,0,0,.55);color:#fff;border:0;border-radius:6px;padding:4px 10px;cursor:pointer}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#141b26;color:var(--mut);font-weight:600}
+  .k-ADD{color:var(--green)} .k-DEL{color:var(--red)} .k-MOD{color:var(--orange)} .k-MOV{color:var(--magenta)}
+  .dls{display:flex;gap:10px;flex-wrap:wrap}
+  .dls a{color:var(--acc);text-decoration:none;border:1px solid var(--line);padding:7px 12px;border-radius:8px;font-size:13px}
+  .dls a:hover{background:#16243a}
+  .dls a.zip{background:var(--green);color:#06210d;border-color:var(--green);font-weight:700;font-size:14px}
+  .dls a.zip:hover{filter:brightness(1.08)}
+  .job{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 11px;border:1px solid var(--line);
+       border-radius:8px;margin-bottom:8px;background:#141b26;font-size:13px}
+  .job .name{font-family:ui-monospace,monospace;color:var(--fg)}
+  .job .info{color:var(--mut)}
+  .job a{color:var(--acc);text-decoration:none;margin-left:auto;border:1px solid var(--line);padding:5px 10px;border-radius:7px}
+  .job a:hover{background:#16243a}
+  .meta{font-size:12px;color:var(--mut);margin-top:8px}
+  .err{color:var(--red);background:#2a1416;border:1px solid #5a2024;padding:10px 12px;border-radius:8px}
+  .hint{font-size:12px;color:var(--mut);margin-top:10px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>🛠️ CAD 修改智能识别</h1>
+  <span class="badge">旧版 vs 新版 · 自动圈注 + 中文摘要</span>
+</header>
+<main>
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label>旧版图纸（.dxf / .dwg / .zip）</label>
+        <input type="file" id="fileOld" accept=".dxf,.dwg,.zip" hidden>
+        <label class="drop" id="dropOld" for="fileOld">点击或拖拽上传旧版图纸</label>
+        <div class="hint" id="nameOld"></div>
+      </div>
+      <div class="field">
+        <label>新版图纸（.dxf / .dwg / .zip）</label>
+        <input type="file" id="fileNew" accept=".dxf,.dwg,.zip" hidden>
+        <label class="drop" id="dropNew" for="fileNew">点击或拖拽上传新版图纸</label>
+        <div class="hint" id="nameNew"></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <div class="field" style="max-width:260px">
+        <label>配置预设</label>
+        <select id="preset"></select>
+      </div>
+    </div>
+    <div class="opts">
+      <label><input type="checkbox" id="optRigid"> 刚体配准（旋转+平移）</label>
+      <label><input type="checkbox" id="optRaster"> 栅格级像素 diff</label>
+      <label><input type="checkbox" id="optNoLlm"> 关闭 LLM（用规则摘要）</label>
+    </div>
+    <button class="go" id="run">开始比对</button>
+    <div class="hint">DWG 会自动转 DXF；ZIP 自动解压取内部图纸。大图（如 1 万实体）约数秒。</div>
+  </div>
+
+  <div id="error" class="err hidden"></div>
+
+  <div id="result" class="hidden">
+    <div class="card">
+      <div class="stats" id="stats"></div>
+      <div class="meta" id="meta"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">智能摘要</h3>
+      <div class="summary" id="summary"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">对比图 / 聚焦放大图</h3>
+      <div class="carousel">
+        <img id="carImg" alt="对比图">
+        <div class="cnav">
+          <button id="prev">‹ 上一张</button>
+          <button id="next">下一张 ›</button>
+        </div>
+      </div>
+      <div class="hint" id="carName"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">变更明细（<span id="cnt"></span> 处）</h3>
+      <div style="max-height:420px;overflow:auto">
+        <table id="tbl"><thead><tr>
+          <th>#</th><th>类型</th><th>图层</th><th>变更</th><th>坐标(X/Y)</th><th>内容</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">下载</h3>
+      <div class="dls" id="dls"></div>
+    </div>
+  </div>
+
+  <div class="card" id="mgmt">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <h3 style="margin-top:0">🗂️ 文件管理（历史比对任务）</h3>
+      <div style="display:flex;gap:8px">
+        <button class="go" style="margin:0;padding:7px 14px;font-size:13px" id="refreshJobs">刷新</button>
+        <button class="go" style="margin:0;padding:7px 14px;font-size:13px;background:#444" id="cleanJobs">清理旧任务</button>
+      </div>
+    </div>
+    <div class="hint">每次比对会自动把全部产物打包成 <code>result.zip</code>。点击「清理旧任务」保留最近 5 个，其余删除。</div>
+    <div id="jobs" style="margin-top:12px"></div>
+  </div>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+let files = {old:null, new:null};
+let images = [], idx = 0;
+
+async function loadPresets(){
+  const r = await fetch('/api/presets'); const j = await r.json();
+  $('#preset').innerHTML = j.presets.map(p=>`<option value="${p}">${p}</option>`).join('');
+}
+function bindDrop(id, key, nameId){
+  const drop = $(id), input = $(id.replace('drop','file'));
+  // label[for] 已关联 input，点击 drop 自动触发文件选择，无需手动 input.click()（避免递归）
+  input.onchange = e=>{ const f=e.target.files[0]; if(f){ files[key]=f; $(nameId).textContent='已选: '+f.name; } };
+  ['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hot')}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot')}));
+  // 拖拽放下：必须阻止默认行为，否则浏览器会直接打开文件而非交给本应用
+  drop.addEventListener('drop',e=>{
+    e.preventDefault();
+    const f = e.dataTransfer.files[0];
+    if(f){ files[key]=f; input.value=''; $(nameId).textContent='已选: '+f.name; }
+  });
+}
+bindDrop('#dropOld','old','#nameOld');
+bindDrop('#dropNew','new','#nameNew');
+
+function showImg(i){
+  if(!images.length) return;
+  idx = (i+images.length)%images.length;
+  $('#carImg').src = images[idx].src;
+  $('#carName').textContent = images[idx].name + `  (${idx+1}/${images.length})`;
+}
+
+$('#run').onclick = async ()=>{
+  $('#error').classList.add('hidden'); $('#result').classList.add('hidden');
+  if(!files.old || !files.new){ $('#error').textContent='请先上传旧版和新版两个文件'; $('#error').classList.remove('hidden'); return; }
+  const btn = $('#run'); btn.disabled = true; btn.textContent='比对中…';
+  const fd = new FormData();
+  fd.append('old', files.old); fd.append('new', files.new);
+  fd.append('preset', $('#preset').value);
+  fd.append('registration', $('#optRigid').checked?'rigid':'');
+  fd.append('raster', $('#optRaster').checked);
+  fd.append('no_llm', $('#optNoLlm').checked);
+  try{
+    const r = await fetch('/api/compare',{method:'POST',body:fd});
+    const j = await r.json();
+    if(!r.ok || !j.ok){ throw new Error(j.detail||'比对失败'); }
+    render(j);
+  }catch(e){ $('#error').textContent='错误: '+e.message; $('#error').classList.remove('hidden'); }
+  finally{ btn.disabled=false; btn.textContent='开始比对'; }
+};
+
+function render(j){
+  const c = j.counts;
+  $('#stats').innerHTML = [
+    ['added','新增',c.ADDED],['deleted','删除',c.DELETED],
+    ['modified','修改',c.MODIFIED],['moved','移动',c.MOVED]
+  ].map(([k,lab,v])=>`<div class="stat"><div class="n ${k}">${v}</div><div class="k">${lab}</div></div>`).join('');
+  const m=j.meta;
+  $('#meta').textContent = `耗时 ${j.elapsed}s · 旧版实体 ${m.old_entities} / 新版 ${m.new_entities}`+
+    (m.block_expanded?` · 展开块内实体 ${m.block_expanded}`:'')+
+    (m.old_proxy||m.new_proxy?` · ⚠ 检测到天正代理对象(PROXY_ENTITY)，可能漏检`:'')+
+    ` · 配准:${m.registration}`;
+  $('#summary').textContent = j.summary.text + `\n\n[摘要来源: ${j.summary.source}]`;
+  images = j.images||[]; showImg(0);
+  $('#cnt').textContent = j.changes.length;
+  const tb = $('#tbl tbody'); tb.innerHTML='';
+  j.changes.forEach((c,i)=>{
+    const b=c.bbox;
+    const content = c.kind==='DELETED'? c.old : c.kind==='ADDED'? c.new : `${c.old} → ${c.new}`;
+    const kcls = c.kind==='DELETED'?'k-DEL':c.kind==='ADDED'?'k-ADD':c.kind==='MODIFIED'?'k-MOD':'k-MOV';
+    tb.insertAdjacentHTML('beforeend',
+      `<tr><td>${i+1}</td><td>${c.type}</td><td>${c.layer}</td>`+
+      `<td class="${kcls}">${c.kind}</td>`+
+      `<td>[${b[0]},${b[2]}]×[${b[1]},${b[3]}]</td><td>${content}</td></tr>`);
+  });
+  $('#dls').innerHTML = (j.downloads||[]).map(d=>
+    `<a href="${d.url}" target="_blank" class="${d.all?'zip':''}">${d.all?'📦 下载全部 (zip)':'⬇ '+d.name}</a>`
+  ).join('');
+  $('#result').classList.remove('hidden');
+}
+$('#prev').onclick=()=>showImg(idx-1);
+$('#next').onclick=()=>showImg(idx+1);
+
+async function loadJobs(){
+  try{
+    const r = await fetch('/api/jobs'); const j = await r.json();
+    const box = $('#jobs');
+    if(!j.jobs.length){ box.innerHTML = '<div class="hint">暂无历史任务（先跑一次比对）。</div>'; return; }
+    const fmt = b => (b>=1048576? (b/1048576).toFixed(1)+' MB' : (b/1024).toFixed(0)+' KB');
+    box.innerHTML = j.jobs.map(jb=>
+      `<div class="job"><span class="name">${jb.job}</span>`+
+      `<span class="info">${jb.count} 文件 · ${fmt(jb.size)} · ${new Date(jb.mtime*1000).toLocaleString()}</span>`+
+      (jb.zip_url? `<a href="${jb.zip_url}" target="_blank">⬇ zip</a>` : '')+
+      `</div>`
+    ).join('');
+  }catch(e){ $('#jobs').innerHTML='<div class="err">加载失败: '+e.message+'</div>'; }
+}
+$('#refreshJobs').onclick = loadJobs;
+$('#cleanJobs').onclick = async ()=>{
+  if(!confirm('确认删除除最近 5 个以外的历史比对任务？')) return;
+  const r = await fetch('/api/clean?keep=5',{method:'POST'});
+  const j = await r.json();
+  alert('已删除 '+j.removed.length+' 个旧任务，保留 '+j.remaining+' 个。');
+  loadJobs();
+};
+loadPresets();
+loadJobs();
+</script>
+</body>
+</html>
