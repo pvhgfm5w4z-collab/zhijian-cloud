@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+.venv/
+.runtime/
+.env
+.env.*
+llm_config.json
+*.log
+jobs/
+projects/
+output/
+release/
+*.bak
